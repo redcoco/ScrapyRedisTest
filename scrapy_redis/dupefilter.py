@@ -6,7 +6,7 @@ from scrapy.utils.request import request_fingerprint
 
 from . import defaults
 from .connection import get_redis_from_settings
-
+from ScrapyRedisTest.utils.bloomfilter import PyBloomFilter,conn,pool
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,8 @@ class RFPDupeFilter(BaseDupeFilter):
         self.key = key
         self.debug = debug
         self.logdupes = True
+        # 集成bloomfilter过滤器
+        self.bf = PyBloomFilter(conn=conn,key=key)  # 利用连接池连接Redis
 
     @classmethod
     def from_settings(cls, settings):
@@ -96,6 +98,14 @@ class RFPDupeFilter(BaseDupeFilter):
 
         """
         fp = self.request_fingerprint(request)
+        # 集成bloomfilter过滤器
+        if self.bf.is_exist(fp): # 判断如果域名在redis存在
+            return True
+        else:
+            self.bf.add(fp)      # 如果不存在，将域名添加到redis
+            return False
+
+
         # This returns the number of values added, zero if already exists.
         added = self.server.sadd(self.key, fp)
         return added == 0

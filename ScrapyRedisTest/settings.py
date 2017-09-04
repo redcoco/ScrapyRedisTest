@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'ScrapyRedisTest.spiders'
 #USER_AGENT = 'ScrapyRedisTest (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -50,11 +50,6 @@ ROBOTSTXT_OBEY = False
 #    'ScrapyRedisTest.middlewares.ScrapyredistestSpiderMiddleware': 543,
 #}
 
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
-ITEM_PIPELINES = {
-    'scrapy_redis.pipelines.RedisPipeline': 300
-}
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {

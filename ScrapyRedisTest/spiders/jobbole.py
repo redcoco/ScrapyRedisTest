@@ -7,10 +7,23 @@ from scrapy_redis.spiders import RedisSpider
 class JobboleSpider(RedisSpider):
     name = 'jobbole'
     allowed_domains = ["blog.jobbole.com"]
+    # start_urls = ['http://blog.jobbole.com/all-posts/page/550/']
     redis_key = 'jobbole:start_urls'
 
-    # 收集伯乐在线所有404的url以及404页面数
-    handle_httpstatus_list = [404]
+
+    # 用户自定义settings
+    custom_settings = {
+        "DOWNLOAD_DELAY": 0.4,
+        "ROBOTSTXT_OBEY": False,
+        # Enables scheduling storing requests queue in redis.
+        "SCHEDULER ":"scrapy_redis.scheduler.Scheduler",
+        # Ensure all spiders share same duplicates filter through redis.
+        "DUPEFILTER_CLASS ":"scrapy_redis.dupefilter.RFPDupeFilter",
+        # Store scraped item in redis for post-processing.
+        "ITEM_PIPELINES ":{
+    'scrapy_redis.pipelines.RedisPipeline': 300
+        },
+    }
 
     def parse(self, response):
         """
@@ -35,4 +48,5 @@ class JobboleSpider(RedisSpider):
             yield Request(url=parse.urljoin(response.url, post_url), callback=self.parse)
 
     def parse_detail(self, response):
-        pass
+        front_image_url = response.meta.get("front_image_url")
+        yield {"front_image_url":front_image_url}
